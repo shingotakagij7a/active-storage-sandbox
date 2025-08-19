@@ -1,0 +1,53 @@
+<h1>Posts</h1>
+
+<%= form_with model: @post, url: posts_path, local: true do |f| %>
+  <% if @post.errors.any? %>
+    <div class="errors">
+      <h2><%= pluralize(@post.errors.count, 'error') %> prohibited this post from being saved:</h2>
+      <ul>
+        <% @post.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div>
+    <%= f.label :title %><br>
+    <%= f.text_field :title %>
+  </div>
+  <div>
+    <%= f.label :body %><br>
+    <%= f.text_area :body, rows: 5 %>
+  </div>
+  <div data-controller="attachment" data-attachment-max-size-value="5242880" data-attachment-types-value='["image/png","image/jpeg","image/gif"]'>
+    <%= f.label :file, 'Attachment' %>
+    <div style="margin-top:4px;margin-bottom:4px;">
+      <button type="button" data-action="attachment#pick">ファイルを選択</button>
+      <button type="button" data-action="attachment#clear">クリア</button>
+    </div>
+    <%= f.file_field :file, style: 'display:none', data: { attachment_target: 'fileInput', action: 'change->attachment#fileChanged' } %>
+    <div data-attachment-target="preview" style="border:1px dashed #ccc;padding:8px;min-height:60px;cursor:pointer;" data-action="click->attachment#pick"></div>
+    <div data-attachment-target="info" style="font-size:12px;color:#555;margin-top:4px;"></div>
+  </div>
+  <div>
+    <%= f.submit 'Create Post' %>
+  </div>
+<% end %>
+
+<hr>
+
+<ul>
+  <% @posts.each do |post| %>
+    <li>
+      <strong><%= post.title %></strong><br>
+      <pre style="white-space: pre-wrap"><%= post.body %></pre>
+      <% if post.file.attached? %>
+        <div>
+          <%= render_attachment_thumbnail(post.file) %>
+          <%= link_to post.file.filename, url_for(post.file) %> (<%= number_to_human_size(post.file.byte_size) %>)
+        </div>
+      <% end %>
+      <small><%= l(post.created_at, format: :short) %></small>
+    </li>
+  <% end %>
+</ul>
