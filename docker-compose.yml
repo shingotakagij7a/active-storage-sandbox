@@ -27,7 +27,6 @@ services:
 
     volumes:
       - .:/rails:cached # アプリコード
-      - bundle_cache:/usr/local/bundle # gem キャッシュ (再ビルド短縮)
       - storage:/rails/storage # Active Storage / SQLite DB (storage/*.sqlite3)
       - tmp:/rails/tmp # pids / cache / bootsnap
     # 変更検知を安定させたい場合 (Linux ホスト):
@@ -39,7 +38,6 @@ services:
     tty: true
 
 volumes:
-  bundle_cache:
   storage:
   tmp:
 # 参考: 本番イメージを試す場合 (コメント解除して利用)
