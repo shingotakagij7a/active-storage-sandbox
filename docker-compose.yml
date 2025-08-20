@@ -1,0 +1,56 @@
+version: "3.9"
+
+# 開発用 docker compose。ホットリロード (volume mount) + bundle キャッシュ + SQLite 永続化。
+services:
+  web:
+    build:
+      context: .
+      args:
+        RAILS_ENV: development
+        BUNDLE_WITHOUT: "" # dev では test もインストールしたければ空のまま
+    image: active-storage-sandbox:dev
+    command: ./bin/rails server -b 0.0.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      RAILS_ENV: development
+      # Dockerfile で BUNDLE_DEPLOYMENT=1 が入っているため開発では無効化
+      BUNDLE_DEPLOYMENT: "0"
+      BUNDLE_WITHOUT: "" # runtime 上でも排除なし
+      # 必要なら: RAILS_MAX_THREADS: 3
+      # TZ 変更したい場合: TZ: Asia/Tokyo
+    volumes:
+      - .:/rails:cached # アプリコード
+      - bundle_cache:/usr/local/bundle # gem キャッシュ (再ビルド短縮)
+      - storage:/rails/storage # Active Storage / SQLite DB (storage/*.sqlite3)
+      - tmp:/rails/tmp # pids / cache / bootsnap
+    # 変更検知を安定させたい場合 (Linux ホスト):
+    #  - type: bind
+    #    source: .
+    #    target: /rails
+    #    consistency: delegated
+    stdin_open: true
+    tty: true
+
+volumes:
+  bundle_cache:
+  storage:
+  tmp:
+# 参考: 本番イメージを試す場合 (コメント解除して利用)
+#  web-prod:
+#    build:
+#      context: .
+#      args:
+#        RAILS_ENV: production
+#        BUNDLE_WITHOUT: "development:test"
+#    image: active-storage-sandbox:latest
+#    command: ./bin/rails server -b 0.0.0.0
+#    ports:
+#      - "3000:3000"
+#    env_file: # または RAILS_MASTER_KEY を直接 environment で渡す
+#      # - .env.production
+#    environment:
+#      RAILS_ENV: production
+#      # RAILS_MASTER_KEY: "<your master key>"
+#    volumes:
+#      - storage:/rails/storage
