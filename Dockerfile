@@ -57,7 +57,7 @@ COPY . .
 RUN bundle lock --add-platform aarch64-linux || true
 
 ## (Re)run a no-op bundle install only if needed (will be fast if unchanged)
-RUN bundle install --local || bundle install
+# RUN bundle install --local || bundle install
 
 ## Now precompile application bootsnap cache
 RUN bundle exec bootsnap precompile app/ lib/
